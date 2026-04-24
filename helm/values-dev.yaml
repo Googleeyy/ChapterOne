@@ -59,7 +59,7 @@ mongodb:
   replicaCount: 1
   persistence:
     size: 2Gi
-    storageClass: "standard"
+    storageClass: "nfs-client"
   resources:
     requests:
       memory: "256Mi"

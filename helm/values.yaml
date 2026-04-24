@@ -6,7 +6,7 @@ global:
 frontend:
   image:
     repository: googleyy/chapterone-frontend
-    tag: "1.0.0"
+    tag: "latest"
   replicaCount: 2
   resources:
     requests:
@@ -45,7 +45,7 @@ frontend:
 bookService:
   image:
     repository: googleyy/book-service
-    tag: "1.0.0"
+    tag: "latest"
   replicaCount: 2
   resources:
     requests:
@@ -79,7 +79,7 @@ bookService:
 userService:
   image:
     repository: googleyy/user-service
-    tag: "1.0.0"
+    tag: "latest"
   replicaCount: 2
   resources:
     requests:
@@ -116,7 +116,7 @@ userService:
 borrowService:
   image:
     repository: googleyy/borrow-service
-    tag: "1.0.0"
+    tag: "latest"
   replicaCount: 2
   resources:
     requests:
