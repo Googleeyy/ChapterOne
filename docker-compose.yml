@@ -1,0 +1,126 @@
+version: '3.9'
+
+networks:
+  chapterone-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
+
+services:
+
+  # ── MongoDB ─────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7.0
+    container_name: chapterone-mongo
+    restart: unless-stopped
+    networks:
+      - chapterone-net
+    volumes:
+      - mongo-data:/data/db
+      - ./db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Book Service ─────────────────────────────────────────────────
+  book-service:
+    build:
+      context: ./book-service
+      dockerfile: Dockerfile
+    container_name: chapterone-book-service
+    restart: unless-stopped
+    networks:
+      - chapterone-net
+    ports:
+      - "8081:8081"
+    environment:
+      MONGO_URI: mongodb://mongo:27017/chapterone_books
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/api/books || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ── User Service ─────────────────────────────────────────────────
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: chapterone-user-service
+    restart: unless-stopped
+    networks:
+      - chapterone-net
+    ports:
+      - "8082:8082"
+    environment:
+      MONGO_URI: mongodb://mongo:27017/chapterone_users
+      JWT_SECRET: chapterone-super-secret-jwt-key-change-in-production-256bits
+      BORROW_SERVICE_URL: http://borrow-service:8083
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/actuator/health || wget -qO- http://localhost:8082/api-docs || exit 0"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ── Borrow Service ───────────────────────────────────────────────
+  borrow-service:
+    build:
+      context: ./borrow-service
+      dockerfile: Dockerfile
+    container_name: chapterone-borrow-service
+    restart: unless-stopped
+    networks:
+      - chapterone-net
+    ports:
+      - "8083:8083"
+    environment:
+      MONGO_URI: mongodb://mongo:27017/chapterone_borrows
+      BOOK_SERVICE_URL: http://book-service:8081
+      USER_SERVICE_URL: http://user-service:8082
+    depends_on:
+      mongo:
+        condition: service_healthy
+      book-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/api-docs || exit 0"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ── Frontend ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chapterone-frontend
+    restart: unless-stopped
+    networks:
+      - chapterone-net
+    ports:
+      - "3000:80"
+    depends_on:
+      - book-service
+      - user-service
+      - borrow-service
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:80 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

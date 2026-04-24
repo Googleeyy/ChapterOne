@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chapterone
+  labels:
+    app.kubernetes.io/name: chapterone
+    app.kubernetes.io/managed-by: kubectl

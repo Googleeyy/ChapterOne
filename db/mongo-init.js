@@ -1,0 +1,43 @@
+// MongoDB Initialization Script
+// Runs on first startup — seeds books and creates collections
+
+// ── Books Database ───────────────────────────────────────────────
+db = db.getSiblingDB('chapterone_books');
+
+db.books.drop();
+
+db.books.insertMany([
+  { title: "Dune", author: "Frank Herbert", genre: "Fiction", description: "A sweeping epic of politics, religion, and ecology set on the desert planet Arrakis.", isbn: "978-0441013593", publishedYear: 1965, totalCopies: 5, availableCopies: 5 },
+  { title: "1984", author: "George Orwell", genre: "Fiction", description: "A haunting vision of a totalitarian society where Big Brother watches your every move.", isbn: "978-0451524935", publishedYear: 1949, totalCopies: 6, availableCopies: 6 },
+  { title: "The Great Gatsby", author: "F. Scott Fitzgerald", genre: "Fiction", description: "A story of wealth, love, and the American Dream set in the roaring twenties.", isbn: "978-0743273565", publishedYear: 1925, totalCopies: 4, availableCopies: 4 },
+  { title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Fiction", description: "A powerful story of racial injustice and the loss of innocence in the American South.", isbn: "978-0061935466", publishedYear: 1960, totalCopies: 5, availableCopies: 5 },
+  { title: "A Brief History of Time", author: "Stephen Hawking", genre: "Science", description: "An accessible exploration of cosmology, black holes, and the nature of time.", isbn: "978-0553380163", publishedYear: 1988, totalCopies: 4, availableCopies: 4 },
+  { title: "The Selfish Gene", author: "Richard Dawkins", genre: "Science", description: "A groundbreaking look at evolution from the gene's perspective.", isbn: "978-0198788607", publishedYear: 1976, totalCopies: 3, availableCopies: 3 },
+  { title: "Sapiens", author: "Yuval Noah Harari", genre: "History", description: "A bold narrative of humankind's creation and destruction spanning 70,000 years of history.", isbn: "978-0062316097", publishedYear: 2011, totalCopies: 6, availableCopies: 6 },
+  { title: "The Guns of August", author: "Barbara Tuchman", genre: "History", description: "A Pulitzer Prize-winning account of the opening weeks of World War I.", isbn: "978-0345476098", publishedYear: 1962, totalCopies: 3, availableCopies: 3 },
+  { title: "The Name of the Wind", author: "Patrick Rothfuss", genre: "Fantasy", description: "The magical autobiography of Kvothe, a legendary wizard, student, and musician.", isbn: "978-0756404079", publishedYear: 2007, totalCopies: 4, availableCopies: 4 },
+  { title: "The Way of Kings", author: "Brandon Sanderson", genre: "Fantasy", description: "An epic fantasy in a world ravaged by storms, where men seek to reclaim ancient power.", isbn: "978-0765326355", publishedYear: 2010, totalCopies: 5, availableCopies: 5 },
+  { title: "Clean Code", author: "Robert C. Martin", genre: "Technology", description: "A handbook of agile software craftsmanship — essential reading for every developer.", isbn: "978-0132350884", publishedYear: 2008, totalCopies: 5, availableCopies: 5 },
+  { title: "The Pragmatic Programmer", author: "David Thomas & Andrew Hunt", genre: "Technology", description: "From journeyman to master — timeless advice for software engineers.", isbn: "978-0135957059", publishedYear: 1999, totalCopies: 4, availableCopies: 4 },
+  { title: "Steve Jobs", author: "Walter Isaacson", genre: "Biography", description: "The exclusive biography of Apple's co-founder, based on hundreds of interviews.", isbn: "978-1451648539", publishedYear: 2011, totalCopies: 4, availableCopies: 4 },
+  { title: "Leonardo da Vinci", author: "Walter Isaacson", genre: "Biography", description: "A biography of history's most creative genius, drawing on his notebooks and art.", isbn: "978-1501139154", publishedYear: 2017, totalCopies: 3, availableCopies: 3 },
+  { title: "Cosmos", author: "Carl Sagan", genre: "Science", description: "A personal voyage through the universe, exploring stars, galaxies, and life itself.", isbn: "978-0345331359", publishedYear: 1980, totalCopies: 4, availableCopies: 4 },
+  { title: "The Hobbit", author: "J.R.R. Tolkien", genre: "Fantasy", description: "Bilbo Baggins, a homebody hobbit, is swept into an epic quest by a wizard and thirteen dwarves.", isbn: "978-0547928227", publishedYear: 1937, totalCopies: 6, availableCopies: 6 },
+  { title: "Guns, Germs, and Steel", author: "Jared Diamond", genre: "History", description: "A fascinating examination of why some civilizations came to dominate others.", isbn: "978-0393317558", publishedYear: 1997, totalCopies: 3, availableCopies: 3 },
+  { title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", genre: "Technology", description: "The definitive guide to the architecture of modern distributed systems.", isbn: "978-1449373320", publishedYear: 2017, totalCopies: 4, availableCopies: 4 },
+  { title: "Educated", author: "Tara Westover", genre: "Biography", description: "A memoir about a woman who grows up in a survivalist family and educates herself into Cambridge.", isbn: "978-0399590504", publishedYear: 2018, totalCopies: 4, availableCopies: 4 },
+  { title: "Brave New World", author: "Aldous Huxley", genre: "Fiction", description: "A dystopian vision of a future society engineered for perfect happiness and total control.", isbn: "978-0060850524", publishedYear: 1932, totalCopies: 5, availableCopies: 5 }
+]);
+
+print('✅ Seeded chapterone_books with ' + db.books.countDocuments() + ' books');
+
+// ── Users Database ───────────────────────────────────────────────
+db = db.getSiblingDB('chapterone_users');
+db.createCollection('users');
+db.users.createIndex({ email: 1 }, { unique: true });
+print('✅ chapterone_users collection ready');
+
+// ── Borrows Database ─────────────────────────────────────────────
+db = db.getSiblingDB('chapterone_borrows');
+db.createCollection('borrow_records');
+print('✅ chapterone_borrows collection ready');
