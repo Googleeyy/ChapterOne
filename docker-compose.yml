@@ -108,7 +108,7 @@ services:
 
   # ── Frontend ─────────────────────────────────────────────────────
   frontend:
-    image: googleyy/chapterone-frontend:latest
+    image: googleyy/frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
