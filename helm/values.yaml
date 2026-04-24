@@ -203,6 +203,6 @@ networkPolicy:
 
 secrets:
   sealedSecrets:
-    enabled: true
+    enabled: false
     controllerName: sealed-secrets
     controllerNamespace: kube-system
