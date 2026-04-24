@@ -1,0 +1,208 @@
+global:
+  environment: dev
+  imageRegistry: ""
+  imagePullPolicy: IfNotPresent
+
+frontend:
+  image:
+    repository: googleyy/chapterone-frontend
+    tag: "1.0.0"
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+  service:
+    type: ClusterIP
+    port: 80
+  probes:
+    readiness:
+      path: /
+      port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 5
+    liveness:
+      path: /
+      port: 80
+      initialDelaySeconds: 20
+      periodSeconds: 10
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 60
+    targetMemoryUtilizationPercentage: 70
+    scaleDownStabilizationWindowSeconds: 120
+    scaleUp:
+      podsPerPeriod: 4
+      periodSeconds: 30
+  env:
+    BACKEND_API_URL: "http://frontend.{{ .Values.global.environment }}.svc.cluster.local:80"
+
+bookService:
+  image:
+    repository: googleyy/book-service
+    tag: "1.0.0"
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  service:
+    type: ClusterIP
+    port: 8081
+  probes:
+    readiness:
+      path: /api/books
+      port: 8081
+      initialDelaySeconds: 60
+      periodSeconds: 10
+    liveness:
+      path: /api/books
+      port: 8081
+      initialDelaySeconds: 90
+      periodSeconds: 15
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+  env:
+    MONGO_URI: "mongodb://mongo-svc.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_books"
+
+userService:
+  image:
+    repository: googleyy/user-service
+    tag: "1.0.0"
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  service:
+    type: ClusterIP
+    port: 8082
+  probes:
+    readiness:
+      path: /actuator/health
+      port: 8082
+      initialDelaySeconds: 40
+      periodSeconds: 10
+    liveness:
+      path: /actuator/health
+      port: 8082
+      initialDelaySeconds: 60
+      periodSeconds: 15
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+  env:
+    MONGO_URI: "mongodb://mongo-svc.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_users"
+    BORROW_SERVICE_URL: "http://borrow-svc.{{ .Values.global.environment }}.svc.cluster.local:8083"
+  secrets:
+    JWT_SECRET: "jwt-secret-placeholder"
+
+borrowService:
+  image:
+    repository: googleyy/borrow-service
+    tag: "1.0.0"
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  service:
+    type: ClusterIP
+    port: 8083
+  probes:
+    readiness:
+      path: /api-docs
+      port: 8083
+      initialDelaySeconds: 60
+      periodSeconds: 10
+    liveness:
+      path: /api-docs
+      port: 8083
+      initialDelaySeconds: 90
+      periodSeconds: 15
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+  env:
+    MONGO_URI: "mongodb://mongo-svc.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_borrows"
+    BOOK_SERVICE_URL: "http://book-svc.{{ .Values.global.environment }}.svc.cluster.local:8081"
+    USER_SERVICE_URL: "http://user-svc.{{ .Values.global.environment }}.svc.cluster.local:8082"
+
+mongodb:
+  image:
+    repository: mongo
+    tag: "7.0"
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  service:
+    type: ClusterIP
+    port: 27017
+  probes:
+    readiness:
+      command: ["mongosh", "--eval", "db.adminCommand('ping')"]
+      initialDelaySeconds: 20
+      periodSeconds: 10
+    liveness:
+      command: ["mongosh", "--eval", "db.adminCommand('ping')"]
+      initialDelaySeconds: 30
+      periodSeconds: 15
+  persistence:
+    enabled: true
+    storageClass: ""
+    accessMode: ReadWriteOnce
+    size: 2Gi
+
+gateway:
+  enabled: true
+  className: kgateway
+  host: "library.local"
+  tls:
+    enabled: false
+    secretName: ""
+
+haproxy:
+  enabled: true
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+networkPolicy:
+  enabled: true
+
+secrets:
+  sealedSecrets:
+    enabled: true
+    controllerName: sealed-secrets
+    controllerNamespace: kube-system

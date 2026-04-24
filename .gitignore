@@ -1,0 +1,29 @@
+# Helm raw secrets - NEVER commit these
+**/raw-secrets*.yaml
+**/unsealed-*.yaml
+/secrets/*.yaml
+!/helm/templates/secrets/sealedsecret.yaml
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

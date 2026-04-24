@@ -1,0 +1,141 @@
+{{- if .Values.gateway.enabled }}
+{{- if not (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1") }}
+{{- fail "Gateway API CRDs not found. Install with: kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/download/standard-install.yaml" }}
+{{- end }}
+
+# GatewayClass - defines which controller implements this Gateway
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: {{ .Values.gateway.className }}
+spec:
+  controllerName: kgateway.dev/gateway-controller
+
+---
+
+# Gateway - the actual ingress point for traffic
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "library-e2e.fullname" . }}-gateway
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "library-e2e.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+spec:
+  gatewayClassName: {{ .Values.gateway.className }}
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: {{ .Values.gateway.host }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+    {{- if .Values.gateway.tls.enabled }}
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: {{ .Values.gateway.host }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ .Values.gateway.tls.secretName }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+    {{- end }}
+
+---
+
+# HTTPRoute - routes traffic to services
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "library-e2e.fullname" . }}-frontend-route
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "library-e2e.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+spec:
+  parentRefs:
+    - name: {{ include "library-e2e.fullname" . }}-gateway
+  hostnames:
+    - {{ .Values.gateway.host }}
+  rules:
+    # Route / (root) to frontend
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: frontend-svc
+          port: 80
+
+---
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "library-e2e.fullname" . }}-api-route
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "library-e2e.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+spec:
+  parentRefs:
+    - name: {{ include "library-e2e.fullname" . }}-gateway
+  hostnames:
+    - {{ .Values.gateway.host }}
+  rules:
+    # Route /api/books/* to book-service (strip /api prefix)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/books
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: book-svc
+          port: 8081
+    # Route /api/users/* to user-service
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/users
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: user-svc
+          port: 8082
+    # Route /api/borrows/* to borrow-service
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/borrows
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: borrow-svc
+          port: 8083
+    # Route /health to book-service for health checks
+    - matches:
+        - path:
+            type: Exact
+            value: /health
+      backendRefs:
+        - name: book-svc
+          port: 8081
+{{- end }}
