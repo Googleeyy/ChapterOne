@@ -1,12 +1,5 @@
-# GatewayClass - defines which controller implements this Gateway
-apiVersion: gateway.networking.k8s.io/v1
-kind: GatewayClass
-metadata:
-  name: kgateway
-spec:
-  controllerName: kgateway.dev/gateway-controller
-
----
+# GatewayClass is already created by kGateway installation
+# Use: kubectl get gatewayclass kgateway
 
 # Gateway - the actual ingress point for traffic
 apiVersion: gateway.networking.k8s.io/v1
