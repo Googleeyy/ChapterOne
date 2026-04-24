@@ -60,17 +60,11 @@ spec:
   parentRefs:
     - name: library-e2e-gateway
   rules:
-    # Route /api/books/* to book-service (strip /api prefix)
+    # Route /api/books/* to book-service
     - matches:
         - path:
             type: PathPrefix
             value: /api/books
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
       backendRefs:
         - name: book-service
           namespace: chapterone
@@ -80,12 +74,6 @@ spec:
         - path:
             type: PathPrefix
             value: /api/users
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
       backendRefs:
         - name: user-service
           namespace: chapterone
@@ -95,12 +83,6 @@ spec:
         - path:
             type: PathPrefix
             value: /api/borrows
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
       backendRefs:
         - name: borrow-service
           namespace: chapterone
