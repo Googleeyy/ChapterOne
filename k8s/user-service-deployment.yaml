@@ -24,6 +24,8 @@ spec:
               value: mongodb://mongo:27017/chapterone_users
             - name: JWT_SECRET
               value: chapterone-super-secret-jwt-key-change-in-production-256bits
+            - name: BORROW_SERVICE_URL
+              value: http://borrow-service:8083
           readinessProbe:
             httpGet:
               path: /api-docs
