@@ -22,8 +22,6 @@ spec:
           volumeMounts:
             - name: mongo-storage
               mountPath: /data/db
-            - name: init-script
-              mountPath: /docker-entrypoint-initdb.d
           readinessProbe:
             exec:
               command: ["mongosh", "--eval", "db.adminCommand('ping')"]
@@ -44,7 +42,3 @@ spec:
         resources:
           requests:
             storage: 2Gi
-  volumes:
-    - name: init-script
-      configMap:
-        name: mongo-init-script
