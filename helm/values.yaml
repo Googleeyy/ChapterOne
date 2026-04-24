@@ -180,7 +180,7 @@ mongodb:
     size: 2Gi
 
 gateway:
-  enabled: true
+  enabled: false
   className: kgateway
   host: "library.local"
   tls:

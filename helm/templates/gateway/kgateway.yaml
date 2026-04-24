@@ -3,16 +3,6 @@
 {{- fail "Gateway API CRDs not found. Install with: kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/download/standard-install.yaml" }}
 {{- end }}
 
-# GatewayClass - defines which controller implements this Gateway
-apiVersion: gateway.networking.k8s.io/v1
-kind: GatewayClass
-metadata:
-  name: {{ .Values.gateway.className }}
-spec:
-  controllerName: kgateway.dev/gateway-controller
-
----
-
 # Gateway - the actual ingress point for traffic
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
@@ -69,7 +59,7 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: frontend-svc
+        - name: frontend
           port: 80
 
 ---
@@ -88,47 +78,32 @@ spec:
   hostnames:
     - {{ .Values.gateway.host }}
   rules:
-    # Route /api/books/* to book-service (strip /api prefix)
+    # Route /api/books/* to book-service
     - matches:
         - path:
             type: PathPrefix
             value: /api/books
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
       backendRefs:
-        - name: book-svc
+        - name: book-service
+          namespace: {{ .Release.Namespace }}
           port: 8081
     # Route /api/users/* to user-service
     - matches:
         - path:
             type: PathPrefix
             value: /api/users
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
       backendRefs:
-        - name: user-svc
+        - name: user-service
+          namespace: {{ .Release.Namespace }}
           port: 8082
     # Route /api/borrows/* to borrow-service
     - matches:
         - path:
             type: PathPrefix
             value: /api/borrows
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
       backendRefs:
-        - name: borrow-svc
+        - name: borrow-service
+          namespace: {{ .Release.Namespace }}
           port: 8083
     # Route /health to book-service for health checks
     - matches:
@@ -136,6 +111,7 @@ spec:
             type: Exact
             value: /health
       backendRefs:
-        - name: book-svc
+        - name: book-service
+          namespace: {{ .Release.Namespace }}
           port: 8081
 {{- end }}
