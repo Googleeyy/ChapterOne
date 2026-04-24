@@ -11,14 +11,10 @@ spec:
   replicas: {{ .Values.frontend.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "library-e2e.name" . }}
-      app.kubernetes.io/component: frontend
       app: frontend
   template:
     metadata:
       labels:
-        {{- include "library-e2e.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: frontend
         app: frontend
     spec:
       containers:

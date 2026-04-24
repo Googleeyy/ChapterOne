@@ -14,14 +14,12 @@ spec:
       protocol: TCP
       name: mongodb
   selector:
-    app.kubernetes.io/name: {{ include "library-e2e.name" . }}
-    app.kubernetes.io/component: database
     app: mongodb
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongo-svc
+  name: mongo
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "library-e2e.labels" . | nindent 4 }}
@@ -34,6 +32,4 @@ spec:
       protocol: TCP
       name: mongodb
   selector:
-    app.kubernetes.io/name: {{ include "library-e2e.name" . }}
-    app.kubernetes.io/component: database
     app: mongodb

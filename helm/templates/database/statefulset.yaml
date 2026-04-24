@@ -1,25 +1,21 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "library-e2e.fullname" . }}-mongodb
+  name: mongodb
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "library-e2e.labels" . | nindent 4 }}
     app.kubernetes.io/component: database
     app: mongodb
 spec:
-  serviceName: mongo-headless
+  serviceName: mongodb-headless
   replicas: {{ .Values.mongodb.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "library-e2e.name" . }}
-      app.kubernetes.io/component: database
       app: mongodb
   template:
     metadata:
       labels:
-        {{- include "library-e2e.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: database
         app: mongodb
     spec:
       containers:

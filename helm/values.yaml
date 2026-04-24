@@ -74,7 +74,7 @@ bookService:
     maxReplicas: 8
     targetCPUUtilizationPercentage: 70
   env:
-    MONGO_URI: "mongodb://mongo-svc.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_books"
+    MONGO_URI: "mongodb://mongo.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_books"
 
 userService:
   image:
@@ -108,8 +108,8 @@ userService:
     maxReplicas: 8
     targetCPUUtilizationPercentage: 70
   env:
-    MONGO_URI: "mongodb://mongo-svc.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_users"
-    BORROW_SERVICE_URL: "http://borrow-svc.{{ .Values.global.environment }}.svc.cluster.local:8083"
+    MONGO_URI: "mongodb://mongo.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_users"
+    BORROW_SERVICE_URL: "http://borrow-service.{{ .Values.global.environment }}.svc.cluster.local:8083"
   secrets:
     JWT_SECRET: "jwt-secret-placeholder"
 
@@ -145,9 +145,9 @@ borrowService:
     maxReplicas: 8
     targetCPUUtilizationPercentage: 70
   env:
-    MONGO_URI: "mongodb://mongo-svc.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_borrows"
-    BOOK_SERVICE_URL: "http://book-svc.{{ .Values.global.environment }}.svc.cluster.local:8081"
-    USER_SERVICE_URL: "http://user-svc.{{ .Values.global.environment }}.svc.cluster.local:8082"
+    MONGO_URI: "mongodb://mongo.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_borrows"
+    BOOK_SERVICE_URL: "http://book-service.{{ .Values.global.environment }}.svc.cluster.local:8081"
+    USER_SERVICE_URL: "http://user-service.{{ .Values.global.environment }}.svc.cluster.local:8082"
 
 mongodb:
   image:

@@ -1,9 +1,9 @@
-{{- $services := dict "book" (dict "root" "book" "port" .Values.bookService.service.port) "user" (dict "root" "user" "port" .Values.userService.service.port) "borrow" (dict "root" "borrow" "port" .Values.borrowService.service.port) -}}
+{{- $services := dict "book" (dict "root" "book-service" "port" .Values.bookService.service.port) "user" (dict "root" "user-service" "port" .Values.userService.service.port) "borrow" (dict "root" "borrow-service" "port" .Values.borrowService.service.port) -}}
 {{- range $name, $svc := $services }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $svc.root }}-svc
+  name: {{ $svc.root }}
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "library-e2e.labels" $ | nindent 4 }}
@@ -16,8 +16,6 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: {{ include "library-e2e.name" $ }}
-    app.kubernetes.io/component: backend
-    app: {{ $name }}-service
+    app: {{ $svc.root }}
 ---
 {{- end }}
