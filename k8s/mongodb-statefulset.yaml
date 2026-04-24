@@ -34,10 +34,17 @@ spec:
               command: ["mongosh", "--eval", "db.adminCommand('ping')"]
             initialDelaySeconds: 30
             periodSeconds: 15
-      volumes:
-        - name: mongo-storage
-          persistentVolumeClaim:
-            claimName: mongo-pvc
-        - name: init-script
-          configMap:
-            name: mongo-init-script
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: nfs-client
+        resources:
+          requests:
+            storage: 2Gi
+  volumes:
+    - name: init-script
+      configMap:
+        name: mongo-init-script
