@@ -175,7 +175,7 @@ mongodb:
       periodSeconds: 15
   persistence:
     enabled: true
-    storageClass: ""
+    storageClass: nfs-client
     accessMode: ReadWriteOnce
     size: 2Gi
 
