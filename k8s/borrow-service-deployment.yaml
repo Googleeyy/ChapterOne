@@ -27,16 +27,14 @@ spec:
             - name: USER_SERVICE_URL
               value: http://user-service:8082
           readinessProbe:
-            httpGet:
-              path: /api-docs
-              port: 8083
-            initialDelaySeconds: 40
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /api-docs
+            tcpSocket:
               port: 8083
             initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8083
+            initialDelaySeconds: 90
             periodSeconds: 15
           resources:
             requests:

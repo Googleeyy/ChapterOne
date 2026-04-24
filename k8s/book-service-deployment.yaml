@@ -23,16 +23,14 @@ spec:
             - name: MONGO_URI
               value: mongodb://mongo:27017/chapterone_books
           readinessProbe:
-            httpGet:
-              path: /api/books
-              port: 8081
-            initialDelaySeconds: 40
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /api/books
+            tcpSocket:
               port: 8081
             initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 90
             periodSeconds: 15
           resources:
             requests:
