@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: chapterone/user-service:latest
+          image: googleyy/user-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8082
@@ -24,15 +24,15 @@ spec:
               value: mongodb://mongo:27017/chapterone_users
             - name: JWT_SECRET
               value: chapterone-super-secret-jwt-key-change-in-production-256bits
+            - name: BORROW_SERVICE_URL
+              value: http://borrow-service:8083
           readinessProbe:
-            httpGet:
-              path: /api-docs
+            tcpSocket:
               port: 8082
             initialDelaySeconds: 40
             periodSeconds: 10
           livenessProbe:
-            httpGet:
-              path: /api-docs
+            tcpSocket:
               port: 8082
             initialDelaySeconds: 60
             periodSeconds: 15

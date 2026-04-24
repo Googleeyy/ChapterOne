@@ -15,21 +15,19 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: chapterone/frontend:latest
+          image: googleyy/chapterone-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
           readinessProbe:
-            httpGet:
-              path: /
+            tcpSocket:
               port: 80
-            initialDelaySeconds: 5
+            initialDelaySeconds: 30
             periodSeconds: 10
           livenessProbe:
-            httpGet:
-              path: /
+            tcpSocket:
               port: 80
-            initialDelaySeconds: 10
+            initialDelaySeconds: 60
             periodSeconds: 15
           resources:
             requests:

@@ -30,6 +30,7 @@ services:
 
   # ── Book Service ─────────────────────────────────────────────────
   book-service:
+    image: googleyy/book-service:latest
     build:
       context: ./book-service
       dockerfile: Dockerfile
@@ -53,6 +54,7 @@ services:
 
   # ── User Service ─────────────────────────────────────────────────
   user-service:
+    image: googleyy/user-service:latest
     build:
       context: ./user-service
       dockerfile: Dockerfile
@@ -78,6 +80,7 @@ services:
 
   # ── Borrow Service ───────────────────────────────────────────────
   borrow-service:
+    image: googleyy/borrow-service:latest
     build:
       context: ./borrow-service
       dockerfile: Dockerfile
@@ -105,6 +108,7 @@ services:
 
   # ── Frontend ─────────────────────────────────────────────────────
   frontend:
+    image: googleyy/frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
