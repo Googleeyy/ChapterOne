@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: chapterone/frontend:latest
+          image: googleyy/chapterone-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80

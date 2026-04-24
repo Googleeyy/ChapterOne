@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: book-service
-          image: chapterone/book-service:latest
+          image: googleyy/book-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081

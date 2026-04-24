@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: borrow-service
-          image: chapterone/borrow-service:latest
+          image: googleyy/borrow-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8083

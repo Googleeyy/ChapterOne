@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: chapterone/user-service:latest
+          image: googleyy/user-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8082
