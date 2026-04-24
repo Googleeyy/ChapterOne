@@ -42,6 +42,7 @@ spec:
             value: /
       backendRefs:
         - name: frontend
+          namespace: chapterone
           port: 80
 
 ---
@@ -72,6 +73,7 @@ spec:
               replacePrefixMatch: /
       backendRefs:
         - name: book-service
+          namespace: chapterone
           port: 8081
     # Route /api/users/* to user-service
     - matches:
@@ -86,6 +88,7 @@ spec:
               replacePrefixMatch: /
       backendRefs:
         - name: user-service
+          namespace: chapterone
           port: 8082
     # Route /api/borrows/* to borrow-service
     - matches:
@@ -100,6 +103,7 @@ spec:
               replacePrefixMatch: /
       backendRefs:
         - name: borrow-service
+          namespace: chapterone
           port: 8083
     # Route /health to book-service for health checks
     - matches:
@@ -108,4 +112,5 @@ spec:
             value: /health
       backendRefs:
         - name: book-service
+          namespace: chapterone
           port: 8081
