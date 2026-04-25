@@ -1,6 +1,11 @@
 # Frontend Subchart Values
 # These values are overridden by the parent chart's values.yaml
 
+global:
+  appName: library-e2e
+  namespace: library-e2e-dev
+  imagePullPolicy: IfNotPresent
+
 frontend:
   name: frontend
   routePrefix: /

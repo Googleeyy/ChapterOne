@@ -1,6 +1,16 @@
 # User Service Subchart Values
 # These values are overridden by the parent chart's values.yaml
 
+global:
+  appName: library-e2e
+  namespace: library-e2e-dev
+  imagePullPolicy: IfNotPresent
+
+mongodb:
+  name: mongodb
+  primaryHost: mongodb-0.mongodb
+  port: 27017
+
 userService:
   name: user-service
   secretName: user-service-secret
