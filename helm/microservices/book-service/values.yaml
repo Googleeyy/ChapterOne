@@ -8,7 +8,7 @@ global:
 
 mongodb:
   name: mongodb
-  primaryHost: mongodb-headless
+  primaryHost: mongodb
   port: 27017
 
 bookService:

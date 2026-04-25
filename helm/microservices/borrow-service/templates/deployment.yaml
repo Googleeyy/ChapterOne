@@ -26,24 +26,6 @@ spec:
         - name: {{ . }}
         {{- end }}
       {{- end }}
-      initContainers:
-        - name: wait-for-mongo
-          image: busybox:1.36
-          command:
-            - sh
-            - -c
-            - |
-              until nc -z {{ .Values.mongodb.primaryHost }} {{ .Values.mongodb.port }}; do
-                echo "Waiting for MongoDB..."
-                sleep 2
-              done
-          resources:
-            requests:
-              memory: "16Mi"
-              cpu: "10m"
-            limits:
-              memory: "32Mi"
-              cpu: "50m"
       containers:
         - name: {{ .Values.borrowService.name }}
           image: "{{ .Values.borrowService.image.repository }}:{{ .Values.borrowService.image.tag }}"
@@ -51,11 +33,13 @@ spec:
           ports:
             - containerPort: {{ .Values.borrowService.port }}
               protocol: TCP
-          envFrom:
-            - configMapRef:
-                name: {{ .Values.borrowService.name }}-config
-            - secretRef:
-                name: {{ .Values.borrowService.secretName }}
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongodb:27017/chapterone_borrows
+            - name: BOOK_SERVICE_URL
+              value: http://book-service:8081
+            - name: USER_SERVICE_URL
+              value: http://user-service:8082
           resources:
             requests:
               cpu: {{ .Values.borrowService.resources.requests.cpu }}
@@ -64,14 +48,12 @@ spec:
               cpu: {{ .Values.borrowService.resources.limits.cpu }}
               memory: {{ .Values.borrowService.resources.limits.memory }}
           readinessProbe:
-            httpGet:
-              path: {{ .Values.borrowService.healthPath }}
+            tcpSocket:
               port: {{ .Values.borrowService.port }}
             initialDelaySeconds: 60
             periodSeconds: 10
           livenessProbe:
-            httpGet:
-              path: {{ .Values.borrowService.healthPath }}
+            tcpSocket:
               port: {{ .Values.borrowService.port }}
             initialDelaySeconds: 90
             periodSeconds: 15
