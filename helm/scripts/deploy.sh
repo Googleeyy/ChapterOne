@@ -23,7 +23,25 @@ echo "Step 1: Check and clean namespace if needed"
 if kubectl get namespace "${NAMESPACE}" >/dev/null 2>&1; then
   echo "Namespace ${NAMESPACE} exists, deleting..."
   kubectl delete namespace "${NAMESPACE}" --ignore-not-found=true --force --grace-period=0 || true
-  sleep 5
+  echo "Waiting for namespace to be fully deleted..."
+  for i in {1..30}; do
+    if ! kubectl get namespace "${NAMESPACE}" >/dev/null 2>&1; then
+      echo "Namespace deleted successfully"
+      break
+    fi
+    echo "Still waiting... ($i/30)"
+    sleep 2
+  done
+  # Force remove if still stuck
+  if kubectl get namespace "${NAMESPACE}" >/dev/null 2>&1; then
+    echo "Namespace still exists, attempting force removal..."
+    kubectl get namespace "${NAMESPACE}" -o json > /tmp/ns.json
+    if [ -f /tmp/ns.json ]; then
+      sed -i '/"finalizers"/d' /tmp/ns.json
+      kubectl replace --raw "/api/v1/namespaces/${NAMESPACE}/finalize" -f /tmp/ns.json || true
+      sleep 2
+    fi
+  fi
 fi
 echo "Namespace ready"
 
