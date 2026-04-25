@@ -19,19 +19,13 @@ echo "Namespace: ${NAMESPACE}"
 echo "Helm Chart: ${HELM_DIR}"
 
 echo ""
-echo "Step 1: Create namespace"
-kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
-kubectl label namespace "${NAMESPACE}" app.kubernetes.io/part-of=library-e2e app.kubernetes.io/managed-by=Helm --overwrite
-echo "Namespace ready"
-
-echo ""
-echo "Step 2: Update Helm dependencies"
+echo "Step 1: Update Helm dependencies"
 cd "${HELM_DIR}"
 helm dependency update
 echo "Dependencies updated"
 
 echo ""
-echo "Step 3: Deploy using Helm"
+echo "Step 2: Deploy using Helm"
 helm upgrade --install "${RELEASE_NAME}" \
   "${HELM_DIR}" \
   -f "${VALUES_FILE}" \
