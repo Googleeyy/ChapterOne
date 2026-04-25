@@ -37,7 +37,7 @@ spec:
       volumes:
         - name: mongo-init
           configMap:
-            name: mongodb-init-script
+            name: mongo-init-script
   volumeClaimTemplates:
     - metadata:
         name: mongo-storage
