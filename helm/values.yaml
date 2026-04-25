@@ -3,13 +3,13 @@
 
 global:
   appName: library-e2e
-  namespace: library-e2e-dev
+  namespace: chapterone
   imagePullSecrets: []
   imagePullPolicy: IfNotPresent
 
 gateway:
   name: library-gateway
-  namespace: library-e2e-dev
+  namespace: chapterone
   gatewayClassName: kgateway
   listener:
     name: http

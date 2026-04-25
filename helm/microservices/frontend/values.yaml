@@ -3,7 +3,7 @@
 
 global:
   appName: library-e2e
-  namespace: library-e2e-dev
+  namespace: chapterone
   imagePullPolicy: IfNotPresent
 
 frontend:
