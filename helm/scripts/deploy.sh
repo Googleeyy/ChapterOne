@@ -21,7 +21,7 @@ echo "Helm Chart: ${HELM_DIR}"
 echo ""
 echo "Step 1: Create namespace"
 kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
-kubectl label namespace "${NAMESPACE}" app.kubernetes.io/part-of=library-e2e app.kubernetes.io/managed-by=helm --overwrite
+kubectl label namespace "${NAMESPACE}" app.kubernetes.io/part-of=library-e2e app.kubernetes.io/managed-by=Helm --overwrite
 echo "Namespace ready"
 
 echo ""
