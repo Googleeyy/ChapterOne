@@ -11,6 +11,10 @@ mongodb:
   primaryHost: mongodb-0.mongodb
   port: 27017
 
+borrowService:
+  name: borrow-service
+  port: 8083
+
 userService:
   name: user-service
   secretName: user-service-secret
