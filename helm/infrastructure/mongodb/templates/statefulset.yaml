@@ -4,15 +4,15 @@ metadata:
   name: mongodb
   namespace: {{ .Values.global.namespace }}
 spec:
-  serviceName: mongodb-headless
+  serviceName: mongo-headless
   replicas: 1
   selector:
     matchLabels:
-      app: mongodb
+      app: {{ .Values.mongodb.name }}
   template:
     metadata:
       labels:
-        app: mongodb
+        app: {{ .Values.mongodb.name }}
     spec:
       containers:
         - name: mongodb
