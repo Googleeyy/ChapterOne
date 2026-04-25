@@ -1,9 +1,7 @@
-{{- if (and .Values.namespace .Values.namespace.create) | default true }}
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .Release.Namespace }}
+  name: {{ .Values.global.namespace }}
   labels:
-    {{- include "library-e2e.labels" . | nindent 4 }}
-    app.kubernetes.io/component: namespace
-{{- end }}
+    name: {{ .Values.global.namespace }}
+    app: {{ .Values.global.appName }}

@@ -1,0 +1,28 @@
+# Book Service Subchart Values
+# These values are overridden by the parent chart's values.yaml
+
+bookService:
+  name: book-service
+  secretName: book-service-secret
+  routePrefix: /api/books
+  healthPath: /api/books
+  image:
+    repository: googleyy/book-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 8081
+  database:
+    name: chapterone_books
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70

@@ -1,0 +1,85 @@
+{{- if .Values.gateway.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: frontend-route
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.gateway.name }}
+spec:
+  parentRefs:
+    - name: {{ .Values.gateway.name }}
+  hostnames:
+    - {{ .Values.gateway.host }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.frontend.routePrefix }}
+      backendRefs:
+        - name: {{ .Values.frontend.name }}
+          port: {{ .Values.frontend.port }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: book-service-route
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.gateway.name }}
+spec:
+  parentRefs:
+    - name: {{ .Values.gateway.name }}
+  hostnames:
+    - {{ .Values.gateway.host }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.bookService.routePrefix }}
+      backendRefs:
+        - name: {{ .Values.bookService.name }}
+          port: {{ .Values.bookService.port }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: user-service-route
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.gateway.name }}
+spec:
+  parentRefs:
+    - name: {{ .Values.gateway.name }}
+  hostnames:
+    - {{ .Values.gateway.host }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.userService.routePrefix }}
+      backendRefs:
+        - name: {{ .Values.userService.name }}
+          port: {{ .Values.userService.port }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: borrow-service-route
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.gateway.name }}
+spec:
+  parentRefs:
+    - name: {{ .Values.gateway.name }}
+  hostnames:
+    - {{ .Values.gateway.host }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.borrowService.routePrefix }}
+      backendRefs:
+        - name: {{ .Values.borrowService.name }}
+          port: {{ .Values.borrowService.port }}
+{{- end }}

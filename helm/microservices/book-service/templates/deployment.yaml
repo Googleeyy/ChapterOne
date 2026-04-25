@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.bookService.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.bookService.name }}
+    app.kubernetes.io/name: {{ .Values.bookService.name }}
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: {{ .Values.global.appName }}
+spec:
+  replicas: {{ .Values.bookService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.bookService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.bookService.name }}
+        app.kubernetes.io/name: {{ .Values.bookService.name }}
+        app.kubernetes.io/component: backend
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-mongo
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ .Values.mongodb.primaryHost }} {{ .Values.mongodb.port }}; do
+                echo "Waiting for MongoDB..."
+                sleep 2
+              done
+          resources:
+            requests:
+              memory: "16Mi"
+              cpu: "10m"
+            limits:
+              memory: "32Mi"
+              cpu: "50m"
+      containers:
+        - name: {{ .Values.bookService.name }}
+          image: "{{ .Values.bookService.image.repository }}:{{ .Values.bookService.image.tag }}"
+          imagePullPolicy: {{ .Values.bookService.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.bookService.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.bookService.name }}-config
+            - secretRef:
+                name: {{ .Values.bookService.secretName }}
+          resources:
+            requests:
+              cpu: {{ .Values.bookService.resources.requests.cpu }}
+              memory: {{ .Values.bookService.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.bookService.resources.limits.cpu }}
+              memory: {{ .Values.bookService.resources.limits.memory }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.bookService.healthPath }}
+              port: {{ .Values.bookService.port }}
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.bookService.healthPath }}
+              port: {{ .Values.bookService.port }}
+            initialDelaySeconds: 90
+            periodSeconds: 15

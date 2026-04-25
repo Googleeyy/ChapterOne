@@ -1,208 +1,172 @@
+# Global values for the Library E2E platform deployment repo.
+# Update image repositories/tags here and manage secret data in secrets/*.yaml.
+
 global:
-  environment: dev
-  imageRegistry: ""
+  appName: library-e2e
+  namespace: library-e2e-dev
+  imagePullSecrets: []
   imagePullPolicy: IfNotPresent
 
-frontend:
+gateway:
+  name: library-gateway
+  namespace: library-e2e-dev
+  gatewayClassName: kgateway
+  listener:
+    name: http
+    port: 80
+  enabled: true
+  host: "library.local"
+  tls:
+    enabled: false
+    secretName: ""
+
+mongodb:
+  name: mongodb
+  secretName: mongodb-secret
+  primaryHost: mongodb-0.mongodb
   image:
-    repository: googleyy/chapterone-frontend
-    tag: "latest"
-  replicaCount: 2
+    repository: mongo
+    tag: "7.0"
+    pullPolicy: IfNotPresent
+  port: 27017
+  storage:
+    size: "2Gi"
+    storageClass: "nfs-client"
   resources:
     requests:
-      memory: "64Mi"
-      cpu: "50m"
+      cpu: "250m"
+      memory: "512Mi"
     limits:
-      memory: "128Mi"
+      cpu: "500m"
+      memory: "1Gi"
+
+bookService:
+  name: book-service
+  secretName: book-service-secret
+  routePrefix: /api/books
+  healthPath: /api/books
+  image:
+    repository: googleyy/book-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 8081
+  database:
+    name: chapterone_books
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+
+userService:
+  name: user-service
+  secretName: user-service-secret
+  routePrefix: /api/users
+  healthPath: /actuator/health
+  image:
+    repository: googleyy/user-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 8082
+  database:
+    name: chapterone_users
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+
+borrowService:
+  name: borrow-service
+  secretName: borrow-service-secret
+  routePrefix: /api/borrows
+  healthPath: /api-docs
+  image:
+    repository: googleyy/borrow-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 8083
+  database:
+    name: chapterone_borrows
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+
+frontend:
+  name: frontend
+  routePrefix: /
+  image:
+    repository: googleyy/chapterone-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 80
+  apiBaseUrl: ""
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
       cpu: "100m"
-  service:
-    type: ClusterIP
-    port: 80
-  probes:
-    readiness:
-      path: /
-      port: 80
-      initialDelaySeconds: 10
-      periodSeconds: 5
-    liveness:
-      path: /
-      port: 80
-      initialDelaySeconds: 20
-      periodSeconds: 10
+      memory: "128Mi"
   autoscaling:
     enabled: true
     minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 60
     targetMemoryUtilizationPercentage: 70
-    scaleDownStabilizationWindowSeconds: 120
-    scaleUp:
-      podsPerPeriod: 4
-      periodSeconds: 30
-  env:
-    BACKEND_API_URL: "http://frontend.{{ .Values.global.environment }}.svc.cluster.local:80"
-
-bookService:
-  image:
-    repository: googleyy/book-service
-    tag: "latest"
-  replicaCount: 2
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "250m"
-    limits:
-      memory: "512Mi"
-      cpu: "500m"
-  service:
-    type: ClusterIP
-    port: 8081
-  probes:
-    readiness:
-      path: /api/books
-      port: 8081
-      initialDelaySeconds: 60
-      periodSeconds: 10
-    liveness:
-      path: /api/books
-      port: 8081
-      initialDelaySeconds: 90
-      periodSeconds: 15
-  autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 8
-    targetCPUUtilizationPercentage: 70
-  env:
-    MONGO_URI: "mongodb://mongo.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_books"
-
-userService:
-  image:
-    repository: googleyy/user-service
-    tag: "latest"
-  replicaCount: 2
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "250m"
-    limits:
-      memory: "512Mi"
-      cpu: "500m"
-  service:
-    type: ClusterIP
-    port: 8082
-  probes:
-    readiness:
-      path: /actuator/health
-      port: 8082
-      initialDelaySeconds: 40
-      periodSeconds: 10
-    liveness:
-      path: /actuator/health
-      port: 8082
-      initialDelaySeconds: 60
-      periodSeconds: 15
-  autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 8
-    targetCPUUtilizationPercentage: 70
-  env:
-    MONGO_URI: "mongodb://mongo.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_users"
-    BORROW_SERVICE_URL: "http://borrow-service.{{ .Values.global.environment }}.svc.cluster.local:8083"
-  secrets:
-    JWT_SECRET: "jwt-secret-placeholder"
-
-borrowService:
-  image:
-    repository: googleyy/borrow-service
-    tag: "latest"
-  replicaCount: 2
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "250m"
-    limits:
-      memory: "512Mi"
-      cpu: "500m"
-  service:
-    type: ClusterIP
-    port: 8083
-  probes:
-    readiness:
-      path: /api-docs
-      port: 8083
-      initialDelaySeconds: 60
-      periodSeconds: 10
-    liveness:
-      path: /api-docs
-      port: 8083
-      initialDelaySeconds: 90
-      periodSeconds: 15
-  autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 8
-    targetCPUUtilizationPercentage: 70
-  env:
-    MONGO_URI: "mongodb://mongo.{{ .Values.global.environment }}.svc.cluster.local:27017/chapterone_borrows"
-    BOOK_SERVICE_URL: "http://book-service.{{ .Values.global.environment }}.svc.cluster.local:8081"
-    USER_SERVICE_URL: "http://user-service.{{ .Values.global.environment }}.svc.cluster.local:8082"
-
-mongodb:
-  image:
-    repository: mongo
-    tag: "7.0"
-  replicaCount: 1
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "250m"
-    limits:
-      memory: "1Gi"
-      cpu: "500m"
-  service:
-    type: ClusterIP
-    port: 27017
-  probes:
-    readiness:
-      command: ["mongosh", "--eval", "db.adminCommand('ping')"]
-      initialDelaySeconds: 20
-      periodSeconds: 10
-    liveness:
-      command: ["mongosh", "--eval", "db.adminCommand('ping')"]
-      initialDelaySeconds: 30
-      periodSeconds: 15
-  persistence:
-    enabled: true
-    storageClass: nfs-client
-    accessMode: ReadWriteOnce
-    size: 2Gi
-
-gateway:
-  enabled: false
-  className: kgateway
-  host: "library.local"
-  tls:
-    enabled: false
-    secretName: ""
 
 haproxy:
   enabled: true
   replicaCount: 2
   resources:
     requests:
-      memory: "128Mi"
       cpu: "100m"
+      memory: "128Mi"
     limits:
-      memory: "256Mi"
       cpu: "200m"
+      memory: "256Mi"
 
 networkPolicy:
   enabled: true
 
 secrets:
-  sealedSecrets:
-    enabled: false
-    controllerName: sealed-secrets
-    controllerNamespace: kube-system
+  - name: mongodb-secret
+    data:
+      # No authentication - using simple URI
+  - name: book-service-secret
+    data:
+      # No MongoDB credentials needed - using simple URI
+  - name: user-service-secret
+    data:
+      # No MongoDB credentials needed - using simple URI
+      JWT_SECRET: "change-me-in-production-jwt-secret"
+  - name: borrow-service-secret
+    data:
+      # No MongoDB credentials needed - using simple URI

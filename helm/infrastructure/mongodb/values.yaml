@@ -1,0 +1,22 @@
+# MongoDB Subchart Values
+# These values are overridden by the parent chart's values.yaml
+
+mongodb:
+  name: mongodb
+  secretName: mongodb-secret
+  primaryHost: mongodb-0.mongodb
+  image:
+    repository: mongo
+    tag: "7.0"
+    pullPolicy: IfNotPresent
+  port: 27017
+  storage:
+    size: "2Gi"
+    storageClass: "nfs-client"
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.mongodb.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.mongodb.name }}
+    app.kubernetes.io/name: {{ .Values.mongodb.name }}
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: {{ .Values.global.appName }}
+spec:
+  serviceName: {{ .Values.mongodb.name }}-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.mongodb.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mongodb.name }}
+        app.kubernetes.io/name: {{ .Values.mongodb.name }}
+        app.kubernetes.io/component: database
+    spec:
+      containers:
+        - name: {{ .Values.mongodb.name }}
+          image: "{{ .Values.mongodb.image.repository }}:{{ .Values.mongodb.image.tag }}"
+          imagePullPolicy: {{ .Values.mongodb.image.pullPolicy }}
+          ports:
+            - name: mongodb
+              containerPort: {{ .Values.mongodb.port }}
+              protocol: TCP
+          env: []
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+            - name: mongo-init
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - db.adminCommand('ping')
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - db.adminCommand('ping')
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: {{ .Values.mongodb.resources.requests.cpu }}
+              memory: {{ .Values.mongodb.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.mongodb.resources.limits.cpu }}
+              memory: {{ .Values.mongodb.resources.limits.memory }}
+      volumes:
+        - name: mongo-init
+          configMap:
+            name: {{ .Values.mongodb.name }}-init-script
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        {{- if .Values.mongodb.storage.storageClass }}
+        storageClassName: {{ .Values.mongodb.storage.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.mongodb.storage.size }}

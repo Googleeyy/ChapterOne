@@ -1,0 +1,28 @@
+# Borrow Service Subchart Values
+# These values are overridden by the parent chart's values.yaml
+
+borrowService:
+  name: borrow-service
+  secretName: borrow-service-secret
+  routePrefix: /api/borrows
+  healthPath: /api-docs
+  image:
+    repository: googleyy/borrow-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 8083
+  database:
+    name: chapterone_borrows
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70

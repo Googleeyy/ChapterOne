@@ -1,148 +1,48 @@
-{{- $gateway := .Values.gateway -}}
-{{- $haproxy := .Values.haproxy -}}
+Thank you for installing {{ .Chart.Name }}!
 
-Thank you for installing {{ .Chart.Name }} version {{ .Chart.Version }}!
+Your release is named {{ .Release.Name }}.
 
-Your Library E2E application has been deployed to namespace: {{ .Release.Namespace }}
-Environment: {{ .Values.global.environment }}
+To learn more about the release, try:
 
-{{- if $gateway.enabled }}
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
 
-╔══════════════════════════════════════════════════════════════════╗
-║                     GATEWAY ACCESS                                ║
-╚══════════════════════════════════════════════════════════════════╝
+NAMESPACE: {{ .Values.global.namespace }}
 
-Gateway Host: {{ $gateway.host }}
+Services:
+  MongoDB: mongodb.{{ .Values.global.namespace }}.svc.cluster.local:27017
+  Book Service: book-service.{{ .Values.global.namespace }}.svc.cluster.local:8081
+  User Service: user-service.{{ .Values.global.namespace }}.svc.cluster.local:8082
+  Borrow Service: borrow-service.{{ .Values.global.namespace }}.svc.cluster.local:8083
+  Frontend: frontend.{{ .Values.global.namespace }}.svc.cluster.local:80
 
-To get the external IP of your gateway:
-
-  # For kGateway (LoadBalancer type)
-  kubectl get gateway {{ include "library-e2e.fullname" . }}-gateway -n {{ .Release.Namespace }}
-  
-  # Get the HTTPRoute status
-  kubectl get httproute -n {{ .Release.Namespace }}
-
-  # If using LoadBalancer, wait for EXTERNAL-IP
-  kubectl get svc -n {{ .Release.Namespace }} -l app.kubernetes.io/component=gateway
-
-  # Test the application
-  curl http://{{ $gateway.host }}/health
-  curl http://{{ $gateway.host }}/api/books
-
+{{- if .Values.gateway.enabled }}
+Gateway:
+  Name: {{ .Values.gateway.name }}
+  Class: {{ .Values.gateway.gatewayClassName }}
+  Host: {{ .Values.gateway.host }}
 {{- end }}
 
-{{- if $haproxy.enabled }}
+To check the status of your pods:
 
-HAProxy Ingress Controller is enabled. Ensure it is installed:
+  $ kubectl get pods -n {{ .Values.global.namespace }}
 
-  helm repo add haproxy-ingress https://haproxy-ingress.github.io/charts
-  helm install haproxy-ingress haproxy-ingress/haproxy-ingress \
-    -n haproxy-ingress --create-namespace \
-    --set controller.ingressClass=haproxy \
-    --set controller.replicaCount={{ $haproxy.replicaCount }}
+To check the status of your services:
 
-{{- end }}
+  $ kubectl get svc -n {{ .Values.global.namespace }}
 
-{{- if .Values.frontend.autoscaling.enabled }}
+To view logs:
 
-╔══════════════════════════════════════════════════════════════════╗
-║                   HPA (AUTOSCALING)                               ║
-╚══════════════════════════════════════════════════════════════════╝
+  $ kubectl logs -n {{ .Values.global.namespace }} -l app=mongodb
+  $ kubectl logs -n {{ .Values.global.namespace }} -l app=book-service
+  $ kubectl logs -n {{ .Values.global.namespace }} -l app=user-service
+  $ kubectl logs -n {{ .Values.global.namespace }} -l app=borrow-service
+  $ kubectl logs -n {{ .Values.global.namespace }} -l app=frontend
 
-Check HPA status:
+To access the application, port-forward to the frontend:
 
-  kubectl get hpa -n {{ .Release.Namespace }}
+  $ kubectl port-forward -n {{ .Values.global.namespace }} svc/frontend 3000:80
 
-Test autoscaling with load:
+Then open http://localhost:3000 in your browser.
 
-  kubectl run -n {{ .Release.Namespace }} load-test --image=busybox --restart=Never -- \
-    sh -c "while true; do wget -q -O- http://frontend-svc; done"
-
-Stop load test:
-
-  kubectl delete pod -n {{ .Release.Namespace }} load-test
-
-{{- end }}
-
-{{- if .Values.networkPolicy.enabled }}
-
-╔══════════════════════════════════════════════════════════════════╗
-║                 NETWORK POLICIES                                  ║
-╚══════════════════════════════════════════════════════════════════╝
-
-Network policies are active. Test connectivity:
-
-  # Frontend should reach backend
-  kubectl exec -n {{ .Release.Namespace }} deployment/{{ include "library-e2e.fullname" . }}-frontend -- \
-    curl -s http://book-svc:8081/api/books
-
-  # Backend should reach database
-  kubectl exec -n {{ .Release.Namespace }} deployment/{{ include "library-e2e.fullname" . }}-book-service -- \
-    nc -z mongo-svc 27017 && echo "DB reachable"
-
-  # Direct DB access from frontend should FAIL
-  kubectl exec -n {{ .Release.Namespace }} deployment/{{ include "library-e2e.fullname" . }}-frontend -- \
-    nc -z mongo-svc 27017 2>&1 || echo "Policy working - frontend cannot reach DB"
-
-{{- end }}
-
-{{- if .Values.secrets.sealedSecrets.enabled }}
-
-╔══════════════════════════════════════════════════════════════════╗
-║                    SEALED SECRETS                                 ║
-╚══════════════════════════════════════════════════════════════════╝
-
-Ensure sealed-secrets controller is installed:
-
-  helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets
-  helm install sealed-secrets sealed-secrets/sealed-secrets -n kube-system
-
-To seal your JWT_SECRET:
-
-  kubectl create secret generic app-secrets \
-    --from-literal=JWT_SECRET=your-actual-secret \
-    --dry-run=client -o yaml | \
-    kubeseal --controller-name=sealed-secrets \
-             --controller-namespace=kube-system \
-             --format yaml > sealed-secret.yaml
-
-Verify secret is unsealed:
-
-  kubectl get secret app-secrets -n {{ .Release.Namespace }}
-
-{{- end }}
-
-╔══════════════════════════════════════════════════════════════════╗
-║                  USEFUL COMMANDS                                  ║
-╚══════════════════════════════════════════════════════════════════╝
-
-Get all resources:
-  kubectl get all -n {{ .Release.Namespace }}
-
-Check pod status:
-  kubectl get pods -n {{ .Release.Namespace }} -w
-
-View logs:
-  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=frontend --tail=100 -f
-
-Port forward frontend (for local testing):
-  kubectl port-forward -n {{ .Release.Namespace }} svc/frontend-svc 8080:80
-
-╔══════════════════════════════════════════════════════════════════╗
-║                   DEPLOYMENT COMMANDS                             ║
-╚══════════════════════════════════════════════════════════════════╝
-
-# Dev deployment:
-helm upgrade --install {{ .Release.Name }} ./helm \
-  -f helm/values.yaml \
-  -f helm/values-dev.yaml \
-  --namespace dev --create-namespace
-
-# Prod deployment:
-helm upgrade --install {{ .Release.Name }} ./helm \
-  -f helm/values.yaml \
-  -f helm/values-prod.yaml \
-  --namespace prod --create-namespace
-
-# Uninstall:
-helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
+IMPORTANT: Replace placeholder secrets in values.yaml before production deployment!
