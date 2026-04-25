@@ -5,6 +5,9 @@ global:
   appName: library-e2e
   namespace: chapterone
 
+haproxy:
+  enabled: true
+
 gateway:
   enabled: true
   name: library-gateway
