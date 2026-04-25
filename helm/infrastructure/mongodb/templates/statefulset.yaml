@@ -41,20 +41,20 @@ spec:
                 - mongosh
                 - --eval
                 - db.adminCommand('ping')
-            initialDelaySeconds: 20
+            initialDelaySeconds: 30
             periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 3
+            timeoutSeconds: 30
+            failureThreshold: 5
           livenessProbe:
             exec:
               command:
                 - mongosh
                 - --eval
                 - db.adminCommand('ping')
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 15
-            timeoutSeconds: 10
-            failureThreshold: 3
+            timeoutSeconds: 30
+            failureThreshold: 5
           resources:
             requests:
               cpu: {{ .Values.mongodb.resources.requests.cpu }}
