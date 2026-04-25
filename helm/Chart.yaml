@@ -10,6 +10,10 @@ dependencies:
     condition: mongodb.enabled
     repository: file://./infrastructure/mongodb
     version: "1.0.0"
+  - name: gateway
+    condition: gateway.enabled
+    repository: file://./infrastructure/gateway
+    version: "1.0.0"
   - name: book-service
     condition: bookService.enabled
     repository: file://./microservices/book-service

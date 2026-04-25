@@ -5,81 +5,63 @@ metadata:
   name: frontend-route
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: {{ .Values.gateway.name }}
+    app: library-e2e
+    component: gateway
 spec:
   parentRefs:
-    - name: {{ .Values.gateway.name }}
-  hostnames:
-    - {{ .Values.gateway.host }}
+    - name: library-e2e-gateway
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: {{ .Values.frontend.routePrefix }}
+            value: /
       backendRefs:
-        - name: {{ .Values.frontend.name }}
-          port: {{ .Values.frontend.port }}
+        - name: frontend
+          namespace: {{ .Values.global.namespace }}
+          port: 80
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: book-service-route
+  name: api-route
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: {{ .Values.gateway.name }}
+    app: library-e2e
+    component: gateway
 spec:
   parentRefs:
-    - name: {{ .Values.gateway.name }}
-  hostnames:
-    - {{ .Values.gateway.host }}
+    - name: library-e2e-gateway
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: {{ .Values.bookService.routePrefix }}
+            value: /api/books
       backendRefs:
-        - name: {{ .Values.bookService.name }}
-          port: {{ .Values.bookService.port }}
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: user-service-route
-  namespace: {{ .Values.global.namespace }}
-  labels:
-    app: {{ .Values.gateway.name }}
-spec:
-  parentRefs:
-    - name: {{ .Values.gateway.name }}
-  hostnames:
-    - {{ .Values.gateway.host }}
-  rules:
+        - name: book-service
+          namespace: {{ .Values.global.namespace }}
+          port: 8081
     - matches:
         - path:
             type: PathPrefix
-            value: {{ .Values.userService.routePrefix }}
+            value: /api/users
       backendRefs:
-        - name: {{ .Values.userService.name }}
-          port: {{ .Values.userService.port }}
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: borrow-service-route
-  namespace: {{ .Values.global.namespace }}
-  labels:
-    app: {{ .Values.gateway.name }}
-spec:
-  parentRefs:
-    - name: {{ .Values.gateway.name }}
-  hostnames:
-    - {{ .Values.gateway.host }}
-  rules:
+        - name: user-service
+          namespace: {{ .Values.global.namespace }}
+          port: 8082
     - matches:
         - path:
             type: PathPrefix
-            value: {{ .Values.borrowService.routePrefix }}
+            value: /api/borrows
       backendRefs:
-        - name: {{ .Values.borrowService.name }}
-          port: {{ .Values.borrowService.port }}
+        - name: borrow-service
+          namespace: {{ .Values.global.namespace }}
+          port: 8083
+    - matches:
+        - path:
+            type: Exact
+            value: /health
+      backendRefs:
+        - name: book-service
+          namespace: {{ .Values.global.namespace }}
+          port: 8081
 {{- end }}
