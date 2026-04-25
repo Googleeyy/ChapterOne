@@ -3,11 +3,6 @@ kind: Deployment
 metadata:
   name: {{ .Values.borrowService.name }}
   namespace: {{ .Values.global.namespace }}
-  labels:
-    app: {{ .Values.borrowService.name }}
-    app.kubernetes.io/name: {{ .Values.borrowService.name }}
-    app.kubernetes.io/component: backend
-    app.kubernetes.io/part-of: {{ .Values.global.appName }}
 spec:
   replicas: {{ .Values.borrowService.replicas }}
   selector:
@@ -17,36 +12,20 @@ spec:
     metadata:
       labels:
         app: {{ .Values.borrowService.name }}
-        app.kubernetes.io/name: {{ .Values.borrowService.name }}
-        app.kubernetes.io/component: backend
     spec:
-      {{- with .Values.global.imagePullSecrets }}
-      imagePullSecrets:
-        {{- range . }}
-        - name: {{ . }}
-        {{- end }}
-      {{- end }}
       containers:
         - name: {{ .Values.borrowService.name }}
           image: "{{ .Values.borrowService.image.repository }}:{{ .Values.borrowService.image.tag }}"
           imagePullPolicy: {{ .Values.borrowService.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.borrowService.port }}
-              protocol: TCP
           env:
             - name: MONGO_URI
-              value: mongodb://mongodb:27017/chapterone_borrows
+              value: mongodb://mongo:27017/chapterone_borrows
             - name: BOOK_SERVICE_URL
               value: http://book-service:8081
             - name: USER_SERVICE_URL
               value: http://user-service:8082
-          resources:
-            requests:
-              cpu: {{ .Values.borrowService.resources.requests.cpu }}
-              memory: {{ .Values.borrowService.resources.requests.memory }}
-            limits:
-              cpu: {{ .Values.borrowService.resources.limits.cpu }}
-              memory: {{ .Values.borrowService.resources.limits.memory }}
           readinessProbe:
             tcpSocket:
               port: {{ .Values.borrowService.port }}
@@ -57,3 +36,10 @@ spec:
               port: {{ .Values.borrowService.port }}
             initialDelaySeconds: 90
             periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

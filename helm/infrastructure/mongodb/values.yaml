@@ -7,9 +7,9 @@ global:
   imagePullPolicy: IfNotPresent
 
 mongodb:
-  name: mongodb
+  name: mongo
   secretName: mongodb-secret
-  primaryHost: mongodb-0.mongodb
+  primaryHost: mongo
   image:
     repository: mongo
     tag: "7.0"

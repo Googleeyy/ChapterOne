@@ -3,11 +3,6 @@ kind: Deployment
 metadata:
   name: {{ .Values.bookService.name }}
   namespace: {{ .Values.global.namespace }}
-  labels:
-    app: {{ .Values.bookService.name }}
-    app.kubernetes.io/name: {{ .Values.bookService.name }}
-    app.kubernetes.io/component: backend
-    app.kubernetes.io/part-of: {{ .Values.global.appName }}
 spec:
   replicas: {{ .Values.bookService.replicas }}
   selector:
@@ -17,32 +12,16 @@ spec:
     metadata:
       labels:
         app: {{ .Values.bookService.name }}
-        app.kubernetes.io/name: {{ .Values.bookService.name }}
-        app.kubernetes.io/component: backend
     spec:
-      {{- with .Values.global.imagePullSecrets }}
-      imagePullSecrets:
-        {{- range . }}
-        - name: {{ . }}
-        {{- end }}
-      {{- end }}
       containers:
         - name: {{ .Values.bookService.name }}
           image: "{{ .Values.bookService.image.repository }}:{{ .Values.bookService.image.tag }}"
           imagePullPolicy: {{ .Values.bookService.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.bookService.port }}
-              protocol: TCP
           env:
             - name: MONGO_URI
-              value: mongodb://mongodb:27017/chapterone_books
-          resources:
-            requests:
-              cpu: {{ .Values.bookService.resources.requests.cpu }}
-              memory: {{ .Values.bookService.resources.requests.memory }}
-            limits:
-              cpu: {{ .Values.bookService.resources.limits.cpu }}
-              memory: {{ .Values.bookService.resources.limits.memory }}
+              value: mongodb://mongo:27017/chapterone_books
           readinessProbe:
             tcpSocket:
               port: {{ .Values.bookService.port }}
@@ -53,3 +32,10 @@ spec:
               port: {{ .Values.bookService.port }}
             initialDelaySeconds: 90
             periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

@@ -3,31 +3,22 @@ kind: Service
 metadata:
   name: {{ .Values.mongodb.name }}
   namespace: {{ .Values.global.namespace }}
-  labels:
-    app: {{ .Values.mongodb.name }}
 spec:
-  type: ClusterIP
-  ports:
-    - port: {{ .Values.mongodb.port }}
-      targetPort: mongodb
-      protocol: TCP
-      name: mongodb
   selector:
     app: {{ .Values.mongodb.name }}
+  ports:
+    - port: {{ .Values.mongodb.port }}
+      targetPort: {{ .Values.mongodb.port }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.mongodb.name }}-headless
   namespace: {{ .Values.global.namespace }}
-  labels:
-    app: {{ .Values.mongodb.name }}
 spec:
   clusterIP: None
-  ports:
-    - port: {{ .Values.mongodb.port }}
-      targetPort: mongodb
-      protocol: TCP
-      name: mongodb
   selector:
     app: {{ .Values.mongodb.name }}
+  ports:
+    - port: {{ .Values.mongodb.port }}
+      targetPort: {{ .Values.mongodb.port }}

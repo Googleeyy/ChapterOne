@@ -7,8 +7,8 @@ global:
   imagePullPolicy: IfNotPresent
 
 mongodb:
-  name: mongodb
-  primaryHost: mongodb
+  name: mongo
+  primaryHost: mongo
   port: 27017
 
 bookService:
