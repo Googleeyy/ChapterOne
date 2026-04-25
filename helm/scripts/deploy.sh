@@ -19,13 +19,22 @@ echo "Namespace: ${NAMESPACE}"
 echo "Helm Chart: ${HELM_DIR}"
 
 echo ""
-echo "Step 1: Update Helm dependencies"
+echo "Step 1: Check and clean namespace if needed"
+if kubectl get namespace "${NAMESPACE}" >/dev/null 2>&1; then
+  echo "Namespace ${NAMESPACE} exists, deleting..."
+  kubectl delete namespace "${NAMESPACE}" --ignore-not-found=true --force --grace-period=0 || true
+  sleep 5
+fi
+echo "Namespace ready"
+
+echo ""
+echo "Step 2: Update Helm dependencies"
 cd "${HELM_DIR}"
 helm dependency update
 echo "Dependencies updated"
 
 echo ""
-echo "Step 2: Deploy using Helm"
+echo "Step 3: Deploy using Helm"
 helm upgrade --install "${RELEASE_NAME}" \
   "${HELM_DIR}" \
   -f "${VALUES_FILE}" \
